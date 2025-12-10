@@ -42,10 +42,12 @@ f418-prompter/
 - Custom drawer screen with SVG graphics which dismisses on tap
 
 ## Howtos
+All commands below are for Linux. Under Windows (PowerShell) it is e.g. `npx.ps1 expo start --clear`
 ### Compile
 1. Run `npm install` to create the folder `node_modules/` and the file `package-lock.json`
 2. Run `npm start` to launch the app
-3. To run on specific platform, try `npm run android`
+3. To run on specific platform, try `npm run android` or `npx expo start --clear`
+
 ### Upgrade
 1. Use e.g. `npm install expo@^53.0.0` to move to SDK v53.
 2. Afterwards check with `npx expo-doctor`

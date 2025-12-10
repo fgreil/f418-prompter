@@ -1,102 +1,109 @@
-/**
- * Database Module (Expo SDK 50+ compatible)
- * 
- * Uses the new async SQLite API from expo-sqlite/next
- */
+import * as SQLite from 'expo-sqlite/legacy';
 
-import { openDatabase } from 'expo-sqlite/next';
+let db = null;
 
-// Create/open the database asynchronously
-let dbPromise = null;
-
-const getDb = async () => {
-  if (!dbPromise) {
-    dbPromise = openDatabase('explore.db');
-  }
-  return dbPromise;
-};
+try {
+  db = SQLite.openDatabase('explore.db');
+} catch (error) {
+  console.warn('[SQLite] Could not open database:', error);
+  db = null;
+}
 
 /**
- * Initialize the database:
- * - Creates table if not exists
- * - Inserts initial data if table is empty
+ * Initialize the database safely.
  */
-export const initDatabase = async () => {
-  const db = await getDb();
+export const initDatabase = () => {
+  return new Promise((resolve) => {
+    if (!db) {
+      console.warn('[SQLite] initDatabase: DB unavailable — continuing without SQLite.');
+      resolve();
+      return;
+    }
 
-  // Create the table
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS content (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      markdown TEXT NOT NULL
-    );
-  `);
+    db.transaction(tx => {
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS content (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            markdown TEXT NOT NULL
+        );`,
+        [],
+        () => {
+          tx.executeSql(
+            'SELECT COUNT(*) AS count FROM content',
+            [],
+            (_, result) => {
+              const count = result?.rows?.item(0)?.count ?? 0;
+              if (count === 0) {
+                const initialData = [
+                  `# Welcome...`,
+                  `# Second...`,
+                  `# Third...`
+                ];
 
-  // Count rows
-  const countResult = await db.getFirstAsync(
-    'SELECT COUNT(*) AS count FROM content'
-  );
-
-  if (countResult.count === 0) {
-    const initialData = [
-      `# Welcome to Explore
-
-This is the **first** content item with *markdown* formatting.
-
-## Features
-
-- Swipe left or right to navigate
-- Markdown support
-- SQLite storage
-
-### Links
-
-Visit [React Native](https://reactnative.dev) for more info.`,
-      `# Second Item
-
-This is the **second** piece of content.
-
-## Highlights
-
-1. Numbered lists
-2. Bold and *italic* text
-3. Multiple heading levels
-
-### More Info
-
-Check out this [link](https://expo.dev) for details.`,
-      `# Third Content
-
-Welcome to the **third** and *final* item!
-
-## Summary
-
-- Three items total
-- Swipe to explore
-- Markdown rendering
-
-Visit [GitHub](https://github.com) to learn more.`
-    ];
-
-    // Insert markdown items inside a single transaction
-    await db.withTransactionAsync(async () => {
-      for (const markdown of initialData) {
-        await db.runAsync(
-          'INSERT INTO content (markdown) VALUES (?)',
-          [markdown]
-        );
-      }
+                initialData.forEach((markdown, index) => {
+                  tx.executeSql(
+                    'INSERT INTO content (markdown) VALUES (?)',
+                    [markdown],
+                    () => {
+                      if (index === initialData.length - 1) resolve();
+                    },
+                    (_, error) => {
+                      console.warn('[SQLite] Insert failed:', error);
+                      resolve();
+                      return false;
+                    }
+                  );
+                });
+              } else {
+                resolve();
+              }
+            },
+            (_, error) => {
+              console.warn('[SQLite] Count failed:', error);
+              resolve();
+              return false;
+            }
+          );
+        },
+        (_, error) => {
+          console.warn('[SQLite] Table creation failed:', error);
+          resolve();
+          return false;
+        }
+      );
     });
-  }
+  });
 };
 
+
 /**
- * Retrieve all content rows from the database
+ * Retrieve all content (never throws)
  */
-export const getContent = async () => {
-  const db = await getDb();
-  const rows = await db.getAllAsync(
-    'SELECT * FROM content ORDER BY id'
-  );
-  return rows;
+export const getContent = () => {
+  return new Promise(resolve => {
+    if (!db) {
+      console.warn('[SQLite] getContent: DB unavailable — returning empty.');
+      resolve([]);
+      return;
+    }
+
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM content ORDER BY id',
+        [],
+        (_, result) => {
+          const rows = [];
+          for (let i = 0; i < result.rows.length; i++) {
+            rows.push(result.rows.item(i));
+          }
+          resolve(rows);
+        },
+        (_, error) => {
+          console.warn('[SQLite] Query failed:', error);
+          resolve([]);
+          return false;
+        }
+      );
+    });
+  });
 };

@@ -22,6 +22,7 @@ import ExploreScreen from './screens/ExploreScreen';
 import FavoritesScreen from './screens/FavoritesScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import SearchScreen from './screens/SearchScreen';
+import ArticleDetailScreen from './screens/ArticleDetailScreen';
 
 // Import database and styles
 import { initDatabase } from './database';
@@ -118,7 +119,7 @@ function TabNavigator() {
   return (
     <>
       <Tab.Navigator
-        screenOptions={{
+        screenOptions={({ navigation }) => ({
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textSecondary,
           tabBarStyle: {
@@ -143,7 +144,20 @@ function TabNavigator() {
               />
             </TouchableOpacity>
           ),
-        }}
+          // NEW: Add search icon to all tabs
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Search')}
+              style={{ marginRight: spacing.md }}
+            >
+              <MaterialIcons 
+                name="search" 
+                size={layout.iconSizes.header} 
+                color={colors.white} 
+              />
+            </TouchableOpacity>
+          ),
+        })}
       >
         {/* Explore tab with globe icon */}
         <Tab.Screen
@@ -209,6 +223,20 @@ function RootStack() {
             fontWeight: fonts.weights.bold,
           },
           title: 'Search',
+        }}
+      />
+	  <Stack.Screen
+        name="ArticleDetail"
+        component={ArticleDetailScreen}
+        options={{
+          headerStyle: {
+            backgroundColor: colors.primary,
+          },
+          headerTintColor: colors.white,
+          headerTitleStyle: {
+            fontWeight: fonts.weights.bold,
+          },
+          title: '',
         }}
       />
     </Stack.Navigator>

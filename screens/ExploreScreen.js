@@ -11,6 +11,7 @@ import { View, ScrollView, Dimensions, StyleSheet, ActivityIndicator } from 'rea
 import Markdown from 'react-native-markdown-display';
 import { getContent } from '../database';
 import { colors, fonts, spacing, layout } from '../styles';
+import { addToViewHistory } from '../database';
 
 const { width } = Dimensions.get('window');
 
@@ -61,6 +62,34 @@ const ExploreScreen = () => {
       </View>
     );
   }
+  
+ /**
+ * Handle article press - navigate to detail and add to history
+ */
+const handleArticlePress = async (item) => {
+  // For now, we'll treat the first H1 as the title
+  const titleMatch = item.markdown.match(/^#\s+(.+)$/m);
+  const title = titleMatch ? titleMatch[1] : 'Article';
+  
+  // Create article object for history
+  const article = {
+    label: `content-${item.id}`, // Use DB id as label
+    title: title,
+    image: '', // No image in current content
+    teaser: item.markdown.substring(0, 150) + '...', // First 150 chars
+  };
+  
+  // Add to history
+  await addToViewHistory(article);
+  
+  // For local content, we could either:
+  // 1. Navigate to ArticleDetail (but it expects an API call)
+  // 2. Keep current behavior (just swipe through carousel)
+  // 3. Create a local article viewer
+  
+  // Option: Show alert for now
+  Alert.alert('Article', 'This is local content. Full article view coming soon!');
+ };
 
   return (
     <View style={styles.container}>
@@ -74,18 +103,22 @@ const ExploreScreen = () => {
         style={styles.scrollView}
       >
         {/* Render each content item as a page */}
-        {content.map((item) => (
-          <ScrollView
-            key={item.id}
-            style={styles.itemContainer}
-            contentContainerStyle={styles.itemContent}
-          >
-            {/* Render markdown with custom styles */}
-            <Markdown style={markdownStyles}>
-              {item.markdown}
-            </Markdown>
-          </ScrollView>
-        ))}
+			{content.map((item) => (
+			  <TouchableOpacity
+				key={item.id}
+				activeOpacity={0.9}
+				onPress={() => handleArticlePress(item)}
+			  >
+				<ScrollView
+				  style={styles.itemContainer}
+				  contentContainerStyle={styles.itemContent}
+				>
+				  <Markdown style={markdownStyles}>
+					{item.markdown}
+				  </Markdown>
+				</ScrollView>
+			  </TouchableOpacity>
+			))}
       </ScrollView>
       
       {/* Pagination dots indicator */}

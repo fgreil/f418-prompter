@@ -8,7 +8,8 @@ export const colors = {
   text: '#333333',
   textSecondary: '#666666',
   link: '#0066cc',
-  inactive: '#999999',
+  error: '#d32f2f',
+  inactive: '#bdbdbd',
   activeDot: '#800080',
 };
 
@@ -16,6 +17,7 @@ export const fonts = {
   regular: 'System',
   bold: 'System',
   sizes: {
+	tiny: 12,
     small: 14,
     medium: 16,
     large: 18,
@@ -60,5 +62,6 @@ export const layout = {
     tab: 24,
     header: 28,
     large: 80,
+	extraLarge: 120,
   },
 };

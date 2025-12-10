@@ -2,6 +2,11 @@
 A simple React-Native app for browsing data from a local SQLite-DB.
 
 ## Project structure
+The folder structure is rather simple: 
+* `assets/` contains the necessary app icons and essential images
+* `screens/` contains all screen components
+* `components/` is for reusable components which is currently only `CustomDrawer.js`.
+* The main configuration files are in the main directory.
 ```
 f418-prompter/
 ├── assets/

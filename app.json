@@ -21,10 +21,21 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#800080"
-      }
+      },
+      "package": "com.fgreil.f418prompter"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4cc18e49-b863-4fa9-8e6e-63f6c6825d42"
+      }
+    },
+    "owner": "fgreil",
+    "plugins": [
+      "expo-font",
+      "expo-sqlite"
+    ]
   }
 }

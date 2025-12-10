@@ -22,7 +22,7 @@ f418-prompter/
 ├── babel.config.js           # Babel transpiler configuration
 ├── database.js               # SQLite database setup and operations
 ├── package.json              # Project dependencies and scripts
-├── package-lock.json         # Locked dependency versions
+├── package-lock.json         # Locked dependency versions (will be generated)
 └── styles.js                 # Central style configuration
 ```
 

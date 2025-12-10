@@ -1,109 +1,105 @@
-import * as SQLite from 'expo-sqlite/legacy';
+/**
+ * Database Module
+ * 
+ * Handles SQLite database initialization and operations
+ * Stores markdown content for the carousel in the Explore screen
+ * 
+ * Note: Using expo-sqlite 16.0.0+ with new async API
+ */
 
-let db = null;
-
-try {
-  db = SQLite.openDatabase('explore.db');
-} catch (error) {
-  console.warn('[SQLite] Could not open database:', error);
-  db = null;
-}
+import * as SQLite from 'expo-sqlite';
 
 /**
- * Initialize the database safely.
+ * Initialize the database
+ * Creates the content table and populates it with initial data if empty
+ * 
+ * @returns {Promise} Resolves when database is ready
  */
-export const initDatabase = () => {
-  return new Promise((resolve) => {
-    if (!db) {
-      console.warn('[SQLite] initDatabase: DB unavailable — continuing without SQLite.');
-      resolve();
-      return;
-    }
-
-    db.transaction(tx => {
-      tx.executeSql(
-        `CREATE TABLE IF NOT EXISTS content (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            markdown TEXT NOT NULL
-        );`,
-        [],
-        () => {
-          tx.executeSql(
-            'SELECT COUNT(*) AS count FROM content',
-            [],
-            (_, result) => {
-              const count = result?.rows?.item(0)?.count ?? 0;
-              if (count === 0) {
-                const initialData = [
-                  `# Welcome...`,
-                  `# Second...`,
-                  `# Third...`
-                ];
-
-                initialData.forEach((markdown, index) => {
-                  tx.executeSql(
-                    'INSERT INTO content (markdown) VALUES (?)',
-                    [markdown],
-                    () => {
-                      if (index === initialData.length - 1) resolve();
-                    },
-                    (_, error) => {
-                      console.warn('[SQLite] Insert failed:', error);
-                      resolve();
-                      return false;
-                    }
-                  );
-                });
-              } else {
-                resolve();
-              }
-            },
-            (_, error) => {
-              console.warn('[SQLite] Count failed:', error);
-              resolve();
-              return false;
-            }
-          );
-        },
-        (_, error) => {
-          console.warn('[SQLite] Table creation failed:', error);
-          resolve();
-          return false;
-        }
+export const initDatabase = async () => {
+  try {
+    // Open the database (creates it if it doesn't exist)
+    const db = await SQLite.openDatabaseAsync('explore.db');
+    
+    // Create the content table if it doesn't exist
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS content (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        markdown TEXT NOT NULL
       );
-    });
-  });
+    `);
+    
+    // Check if data already exists
+    const result = await db.getFirstAsync('SELECT COUNT(*) as count FROM content');
+    
+    if (result.count === 0) {
+      // Insert initial markdown content if table is empty
+      const initialData = [
+        `# Welcome to Explore
+
+This is the **first** content item with *markdown* formatting.
+
+## Features
+
+- Swipe left or right to navigate
+- Markdown support
+- SQLite storage
+
+### Links
+
+Visit [React Native](https://reactnative.dev) for more info.`,
+        `# Second Item
+
+This is the **second** piece of content.
+
+## Highlights
+
+1. Numbered lists
+2. Bold and *italic* text
+3. Multiple heading levels
+
+### More Info
+
+Check out this [link](https://expo.dev) for details.`,
+        `# Third Content
+
+Welcome to the **third** and *final* item!
+
+## Summary
+
+- Three items total
+- Swipe to explore
+- Markdown rendering
+
+Visit [GitHub](https://github.com) to learn more.`
+      ];
+
+      // Insert each markdown item into the database
+      for (const markdown of initialData) {
+        await db.runAsync('INSERT INTO content (markdown) VALUES (?)', [markdown]);
+      }
+    }
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    throw error;
+  }
 };
 
-
 /**
- * Retrieve all content (never throws)
+ * Retrieve all content from the database
+ * 
+ * @returns {Promise<Array>} Array of content objects with id and markdown properties
  */
-export const getContent = () => {
-  return new Promise(resolve => {
-    if (!db) {
-      console.warn('[SQLite] getContent: DB unavailable — returning empty.');
-      resolve([]);
-      return;
-    }
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM content ORDER BY id',
-        [],
-        (_, result) => {
-          const rows = [];
-          for (let i = 0; i < result.rows.length; i++) {
-            rows.push(result.rows.item(i));
-          }
-          resolve(rows);
-        },
-        (_, error) => {
-          console.warn('[SQLite] Query failed:', error);
-          resolve([]);
-          return false;
-        }
-      );
-    });
-  });
+export const getContent = async () => {
+  try {
+    // Open the database
+    const db = await SQLite.openDatabaseAsync('explore.db');
+    
+    // Fetch all content ordered by id
+    const allRows = await db.getAllAsync('SELECT * FROM content ORDER BY id');
+    
+    return allRows;
+  } catch (error) {
+    console.error('Error getting content:', error);
+    throw error;
+  }
 };

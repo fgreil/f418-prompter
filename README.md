@@ -41,11 +41,15 @@ f418-prompter/
 - SQLite database with three content entries
 - Custom drawer screen with SVG graphics which dismisses on tap
 
-## Howto
+## Howtos
+### Compile
 1. Run `npm install` to create the folder `node_modules/` and the file `package-lock.json`
 2. Run `npm start` to launch the app
 3. To run on specific platform, try `npm run android`
-
+### Upgrade
+1. Use e.g. `npm install expo@^53.0.0` to move to SDK v53.
+2. Afterwards check with `npx expo-doctor`
+3. A frequent recommendation from (2) is to run `npx epo install --check` which modifies `node_modules/`, `package.json`, `package-lock.json`
 ## Version history
 See [changelog.md](changelog.md)
 

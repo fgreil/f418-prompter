@@ -2,7 +2,7 @@
 
 export const colors = {
   primary: 'rgb(128, 0, 128)',
-  background: 'rgb(163, 163, 163)',
+  background: '#FFFFFF',
   white: '#FFFFFF',
   black: '#000000',
   text: '#333333',

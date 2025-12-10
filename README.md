@@ -45,3 +45,8 @@ f418-prompter/
 1. Run `npm install` to create the folder `node_modules/` and the file `package-lock.json`
 2. Run `npm start` to launch the app
 3. To run on specific platform, try `npm run android`
+
+## Version history
+See [changelog.md](changelog.md)
+
+

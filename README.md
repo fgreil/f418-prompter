@@ -52,6 +52,7 @@ All commands below are for Linux. Under Windows (PowerShell) it is e.g. `npx.ps1
 1. Use e.g. `npm install expo@^53.0.0` to move to SDK v53.
 2. Afterwards check with `npx expo-doctor`
 3. A frequent recommendation from (2) is to run `npx epo install --check` which modifies `node_modules/`, `package.json`, `package-lock.json`
+4. Usually, after each upgrade, you have to clean up by `Remove-Item -Recurse -Force .\package-lock.json, .\node_modules\` and then again `npm.ps1 install`. 
 ## Version history
 See [changelog.md](changelog.md)
 
